@@ -1,0 +1,43 @@
+video1 = VideoReader(filename1);
+video2=VideoReader(filename2);
+    count1=video1.FrameRate*video1.Duration;
+    count2=video2.FrameRate*video2.Duration;
+    if (count1~=count2)
+        display('The number of frames are different');
+    end
+    v1=zeros(video1.Height,video1.Width,3,count1);
+    u1=zeros(video1.Height,video1.Width,count1);
+    v2=zeros(video2.Height,video2.Width,3,count1);
+    u2=zeros(video2.Height,video2.Width,count1);
+    count1=0;count2=0;
+    while hasFrame(video1)
+        count1=count1+1;
+        v1(:,:,:,count1)=readFrame(video1);
+    end
+    while hasFrame(video2)
+        count2=count2+1;
+        v2(:,:,:,count2)=readFrame(video2);
+    end
+    v1=uint8(v1); v2=uint8(v2);
+    
+    for i=1:count1
+        t=SURFeature_Registration_4_1(v1(:,:,:,i),v2(:,:,:,i));
+        imshow(uint8(t));
+        drawnow;
+    end
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+SURFeature_Registration_4_1('videopan/1');
+SURFeature_Registration_4_1('videopan/2');

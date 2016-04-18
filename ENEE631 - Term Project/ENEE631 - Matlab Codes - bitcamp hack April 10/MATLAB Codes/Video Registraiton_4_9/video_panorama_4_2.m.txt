@@ -1,0 +1,36 @@
+function[]=video_panorama_4_2(filename1, filename2)
+
+    video1 = VideoReader(filename1); video2=VideoReader(filename2);
+    
+    count1=floor(video1.FrameRate*video1.Duration);
+    count2=floor(video2.FrameRate*video2.Duration);
+    
+%     if (count1~=count2)
+%         display('The number of frames are different');
+%         return;
+%     end
+    t=cell(10,1);
+    count1=0; count2=0;
+    while hasFrame(video1)
+        count1=count1+1;
+        if count1>5
+            break;
+        end
+        A=readFrame(video1);
+        B=readFrame(video2);
+        temp=SURFeature_Registration_4_1(A,B);
+        t{count1}=uint8(temp);
+        
+        
+%         imshow(uint8(t));
+%         drawnow;
+    end
+    
+    figure;
+    for i=1:5
+        imshow(uint8(t{i}));
+        drawnow;
+       
+    end
+    %implay(t);
+end

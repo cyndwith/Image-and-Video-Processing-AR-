@@ -1,0 +1,57 @@
+clc;
+clear all;
+Im1 = rgb2gray(imread('images/building1.jpg'));
+Im2 = rgb2gray(imread('images/building2.jpg'));
+
+points1 = detectSURFFeatures(Im1);
+[features1 points1] = extractFeatures(Im1,points1);
+
+points2 = detectSURFFeatures(Im1);
+[features2 points2] = extractFeatures(Im2,points2);
+
+matchPairs = matchFeatures(features1,features2,'Unique',true);
+matchPoints1 = points1(matchPairs(:,1),:);
+matchPoints2 = points2(matchPairs(:,2),:);
+
+T = estimateGeometricTransform(matchPoints1,matchPoints2,'projective');
+
+imageSize = size(Im1);
+[xlim, ylim] = outputLimits(T, [1 imageSize(2)], [1 imageSize(1)]);
+% Find the minimum and maximum output limits
+xMin = min([1; xlim(:)]);
+xMax = max([imageSize(2); xlim(:)]);
+
+yMin = min([1; ylim(:)]);
+yMax = max([imageSize(1); ylim(:)]);
+
+width  = round(xMax - xMin);
+height = round(yMax - yMin);
+
+% Initialize the "empty" panorama.
+panorama = zeros([height width 3], 'like', Im1);
+
+% outputView = imref2d([height width]);
+% ImNew = imwarp(Im1, T, 'OutputView', outputView);
+% ImNew2 = imfuse(ImNew,Im2,'blend');
+% figure(1);subplot(1,2,1);imshow(Im1);
+% subplot(1,2,2);imshow(Im2);
+% figure(2); imshow(ImNew2); title('Recovered image');
+
+blender=vision.AlphaBlender('Operation','Binary mask','MaskSource','Input port');
+xLimits = [xMin xMax];
+yLimits = [yMin yMax];
+panoramaView = imref2d([height width], xLimits, yLimits);
+
+% Creating the panaroma
+
+warpedImage=imwarp(Im1, T,'OutputView', panoramaView);
+ panorama = step(blender, panorama(:,:,1), warpedImage,warpedImage(:,:));
+T.T=eye(3);
+warpedImage=imwarp(Im2,T,'OutputView', panoramaView);
+panorama = step(blender, panorama(:,:,1), warpedImage,warpedImage(:,:));
+
+
+figure
+imshow(warpedIm)
+
+
